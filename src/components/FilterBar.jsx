@@ -34,8 +34,8 @@ export default function FilterBar({
           onChange={(e) => onSearchChange(e.target.value)}
         />
         {searchQuery && (
-          <button 
-            className="search-clear-btn" 
+          <button
+            className="search-clear-btn"
             onClick={() => onSearchChange('')}
             title="Clear search"
           >
@@ -74,8 +74,6 @@ export default function FilterBar({
             <option value="id-desc">Recently Added</option>
             <option value="title-asc">Title (A – Z)</option>
             <option value="title-desc">Title (Z – A)</option>
-            <option value="rating-desc">Rating (High – Low)</option>
-            <option value="playtime-desc">Playtime (High – Low)</option>
           </select>
         </div>
       </div>

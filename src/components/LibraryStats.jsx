@@ -2,17 +2,10 @@ import React from 'react';
 
 export default function LibraryStats({ items = [] }) {
   const totalGames = items.length;
-  const playingCount = items.filter(g => g.status === 'PLAYING').length;
-  const completedCount = items.filter(g => g.status === 'COMPLETED').length;
-  const backlogCount = items.filter(g => g.status === 'BACKLOG').length;
-  const droppedCount = items.filter(g => g.status === 'DROPPED').length;
-
-  const totalPlaytime = items.reduce((acc, curr) => acc + (curr.playtimeHours || 0), 0);
-  
-  const ratedGames = items.filter(g => g.personalRating != null);
-  const avgRating = ratedGames.length > 0 
-    ? (ratedGames.reduce((acc, curr) => acc + curr.personalRating, 0) / ratedGames.length).toFixed(1)
-    : '—';
+  const playingCount = items.filter((g) => g.status === 'PLAYING').length;
+  const completedCount = items.filter((g) => g.status === 'COMPLETED').length;
+  const backlogCount = items.filter((g) => g.status === 'BACKLOG').length;
+  const droppedCount = items.filter((g) => g.status === 'DROPPED').length;
 
   return (
     <section className="stats-grid" aria-label="Library Overview Statistics">
@@ -53,22 +46,6 @@ export default function LibraryStats({ items = [] }) {
         <div className="stat-content">
           <span className="stat-value">{droppedCount}</span>
           <span className="stat-label">Dropped</span>
-        </div>
-      </div>
-
-      <div className="stat-card stat-playtime">
-        <div className="stat-icon">⏱️</div>
-        <div className="stat-content">
-          <span className="stat-value">{totalPlaytime} <small>hrs</small></span>
-          <span className="stat-label">Total Playtime</span>
-        </div>
-      </div>
-
-      <div className="stat-card stat-rating">
-        <div className="stat-icon">⭐</div>
-        <div className="stat-content">
-          <span className="stat-value">{avgRating} <small>/10</small></span>
-          <span className="stat-label">Avg Rating</span>
         </div>
       </div>
     </section>

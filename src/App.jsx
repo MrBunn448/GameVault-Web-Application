@@ -6,7 +6,7 @@ import GameCard from './components/GameCard';
 import AddGameModal from './components/AddGameModal';
 import EmptyState from './components/EmptyState';
 import Toast from './components/Toast';
-import { getLibrary, addGameToLibrary, deleteGameFromLibrary } from './services/api';
+import { getLibrary, addGameToLibrary } from './services/api';
 import './App.css';
 
 export default function App() {
@@ -78,19 +78,6 @@ export default function App() {
     showToast(`Added "${created.title}" to your library!`, 'success');
   };
 
-  const handleDeleteGame = async (id) => {
-    try {
-      await deleteGameFromLibrary(id);
-      setGames((prev) => prev.filter((g) => g.id !== id));
-      showToast('Game removed from library.', 'success');
-    } catch (err) {
-      console.error('Error deleting game:', err);
-      showToast(err.message || 'Failed to remove game.', 'error');
-      throw err;
-    }
-  };
-
-  // Filter and sort games
   const filteredAndSortedGames = useMemo(() => {
     let result = [...games];
 
@@ -109,10 +96,6 @@ export default function App() {
           return (a.title || '').localeCompare(b.title || '');
         case 'title-desc':
           return (b.title || '').localeCompare(a.title || '');
-        case 'rating-desc':
-          return (b.personalRating || 0) - (a.personalRating || 0);
-        case 'playtime-desc':
-          return (b.playtimeHours || 0) - (a.playtimeHours || 0);
         case 'id-desc':
         default:
           return (b.id || 0) - (a.id || 0);
@@ -138,7 +121,7 @@ export default function App() {
             <div>
               <h2 className="page-title">Personal Game Library</h2>
               <p className="page-subtitle">
-                Sprint 1 RESTful API Interface — tracking games, playthrough status, ratings, and playtime
+                GameVault in-memory REST API &amp; library view
               </p>
             </div>
           </header>
@@ -178,7 +161,6 @@ export default function App() {
                 <GameCard
                   key={game.id}
                   game={game}
-                  onDelete={handleDeleteGame}
                 />
               ))}
             </div>
