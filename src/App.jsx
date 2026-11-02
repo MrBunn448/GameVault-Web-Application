@@ -4,9 +4,10 @@ import LibraryStats from './components/LibraryStats';
 import FilterBar from './components/FilterBar';
 import GameCard from './components/GameCard';
 import AddGameModal from './components/AddGameModal';
+import ClearConfirmModal from './components/ClearConfirmModal';
 import EmptyState from './components/EmptyState';
 import Toast from './components/Toast';
-import { getLibrary, addGameToLibrary } from './services/api';
+import { getLibrary, addGameToLibrary, importSteamLibrary, deleteGameFromLibrary, clearLibrary } from './services/api';
 import './App.css';
 
 export default function App() {
@@ -16,6 +17,7 @@ export default function App() {
   const [isConnected, setIsConnected] = useState(false);
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isClearModalOpen, setIsClearModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [sortBy, setSortBy] = useState('id-desc');
@@ -78,6 +80,33 @@ export default function App() {
     showToast(`Added "${created.title}" to your library!`, 'success');
   };
 
+  const handleImportSteam = async (steamId) => {
+    const imported = await importSteamLibrary(steamId);
+    await loadLibrary();
+    const count = Array.isArray(imported) ? imported.length : 0;
+    showToast(`Synced ${count} game${count === 1 ? '' : 's'} from Steam!`, 'success');
+  };
+
+  const handleDeleteGame = async (id) => {
+    try {
+      await deleteGameFromLibrary(id);
+      setGames((prev) => prev.filter((g) => g.id !== id));
+      showToast('Game removed from library', 'info');
+    } catch (err) {
+      showToast(err.message || 'Failed to remove game', 'error');
+    }
+  };
+
+  const handleClearLibrary = async () => {
+    try {
+      await clearLibrary();
+      setGames([]);
+      showToast('All games cleared from database!', 'success');
+    } catch (err) {
+      showToast(err.message || 'Failed to clear database', 'error');
+    }
+  };
+
   const filteredAndSortedGames = useMemo(() => {
     let result = [...games];
 
@@ -113,17 +142,29 @@ export default function App() {
         onOpenAddModal={() => setIsAddModalOpen(true)}
         isConnected={isConnected}
         onRefresh={loadLibrary}
+        gamesCount={games.length}
+        onOpenClearModal={() => setIsClearModalOpen(true)}
       />
 
       <main className="main-content">
         <div className="content-container">
-          <header className="page-header">
+          <header className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '0.75rem' }}>
             <div>
               <h2 className="page-title">Personal Game Library</h2>
               <p className="page-subtitle">
-                GameVault in-memory REST API &amp; library view
+                Track your gaming journey &bull; Spring Boot, MySQL &amp; Steam Web API
               </p>
             </div>
+            {games.length > 0 && (
+              <button
+                type="button"
+                className="btn btn-sm btn-secondary btn-danger-hover"
+                onClick={() => setIsClearModalOpen(true)}
+                title="Delete all games from database"
+              >
+                🗑️ Clear Library ({games.length})
+              </button>
+            )}
           </header>
 
           <LibraryStats items={games} />
@@ -161,6 +202,7 @@ export default function App() {
                 <GameCard
                   key={game.id}
                   game={game}
+                  onDelete={handleDeleteGame}
                 />
               ))}
             </div>
@@ -194,6 +236,14 @@ export default function App() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onSave={handleAddGame}
+        onImportSteam={handleImportSteam}
+      />
+
+      <ClearConfirmModal
+        isOpen={isClearModalOpen}
+        onClose={() => setIsClearModalOpen(false)}
+        onConfirm={handleClearLibrary}
+        gameCount={games.length}
       />
 
       <Toast toast={toast} onClose={() => setToast(null)} />

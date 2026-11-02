@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function Navbar({ onOpenAddModal, isConnected, onRefresh }) {
+export default function Navbar({ onOpenAddModal, isConnected, onRefresh, gamesCount = 0, onOpenClearModal }) {
   return (
     <header className="navbar">
       <div className="navbar-container">
@@ -8,7 +8,7 @@ export default function Navbar({ onOpenAddModal, isConnected, onRefresh }) {
           <div className="brand-logo">🎮</div>
           <div className="brand-info">
             <h1 className="brand-title">GameVault</h1>
-            <span className="brand-tagline">Personal Library & Progress Tracker</span>
+            <span className="brand-tagline">Personal Library &amp; Progress Tracker</span>
           </div>
         </div>
 
@@ -26,6 +26,17 @@ export default function Navbar({ onOpenAddModal, isConnected, onRefresh }) {
           >
             🔄 Refresh
           </button>
+
+          {gamesCount > 0 && onOpenClearModal && (
+            <button
+              className="btn btn-secondary btn-danger-hover"
+              onClick={onOpenClearModal}
+              title="Delete all stored games from database"
+              aria-label="Reset all game data"
+            >
+              🗑️ Reset Data
+            </button>
+          )}
 
           <button 
             className="btn btn-primary" 

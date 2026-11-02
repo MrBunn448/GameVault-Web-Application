@@ -15,16 +15,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Pull down git repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Set up Node.js 22 environment
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
+      # Clean install dependencies from package-lock
       - name: Install dependencies
         run: npm ci
 
+      # Static code linting
+      - name: Run linter
+        run: npm run lint
+
+      # Build production bundle with Vite
       - name: Build
         run: npm run build
