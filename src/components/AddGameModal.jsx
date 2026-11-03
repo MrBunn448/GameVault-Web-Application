@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-const INITIAL_FORM = {
-  title: '',
-  status: 'PLAYING',
-};
+const STATUS_OPTIONS = [
+  { value: 'PLAYING', label: 'Playing' },
+  { value: 'COMPLETED', label: 'Completed' },
+  { value: 'BACKLOG', label: 'Backlog' },
+  { value: 'DROPPED', label: 'Dropped' },
+];
 
 export default function AddGameModal({ isOpen, onClose, onSave, onImportSteam }) {
   if (!isOpen) return null;
+
   return (
-    <AddGameModalDialog
+    <AddGameDialog
       onClose={onClose}
       onSave={onSave}
       onImportSteam={onImportSteam}
@@ -16,58 +19,51 @@ export default function AddGameModal({ isOpen, onClose, onSave, onImportSteam })
   );
 }
 
-function AddGameModalDialog({ onClose, onSave, onImportSteam }) {
+function AddGameDialog({ onClose, onSave, onImportSteam }) {
   const [mode, setMode] = useState('manual'); // 'manual' or 'steam'
-  const [formData, setFormData] = useState(INITIAL_FORM);
+  const [title, setTitle] = useState('');
+  const [status, setStatus] = useState('PLAYING');
+  const [hours, setHours] = useState('');
+  const [headerImageUrl, setHeaderImageUrl] = useState('');
   const [steamId, setSteamId] = useState('');
-  const [errors, setErrors] = useState({});
+
+  const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [apiError, setApiError] = useState(null);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: null }));
-    }
-    setApiError(null);
-  };
-
-  const validateManual = () => {
-    const newErrors = {};
-    if (!formData.title.trim()) {
-      newErrors.title = 'Game title is required.';
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const validateSteam = () => {
-    const newErrors = {};
-    if (!steamId.trim()) {
-      newErrors.steamId = 'Steam ID is required.';
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && !isSubmitting) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isSubmitting, onClose]);
 
   const handleManualSubmit = async (e) => {
     e.preventDefault();
-    if (!validateManual()) return;
+    if (!title.trim()) {
+      setError('Game title is required.');
+      return;
+    }
 
     try {
       setIsSubmitting(true);
-      setApiError(null);
+      setError(null);
 
-      const payload = {
-        title: formData.title.trim(),
-        status: formData.status,
-      };
+      const parsedHours = parseFloat(hours) || 0;
+      const playtimeMinutes = Math.round(parsedHours * 60);
 
-      await onSave(payload);
+      await onSave({
+        title: title.trim(),
+        status,
+        playtimeMinutes,
+        headerImageUrl: headerImageUrl.trim() || null,
+      });
+
       onClose();
     } catch (err) {
-      setApiError(err.message || 'Failed to add game.');
+      setError(err.message || 'Failed to add game.');
     } finally {
       setIsSubmitting(false);
     }
@@ -75,55 +71,70 @@ function AddGameModalDialog({ onClose, onSave, onImportSteam }) {
 
   const handleSteamSubmit = async (e) => {
     e.preventDefault();
-    if (!validateSteam()) return;
+    if (!steamId.trim()) {
+      setError('Steam ID or vanity username is required.');
+      return;
+    }
 
     try {
       setIsSubmitting(true);
-      setApiError(null);
+      setError(null);
 
       await onImportSteam(steamId.trim());
       onClose();
     } catch (err) {
-      setApiError(err.message || 'Failed to import games from Steam.');
+      setError(err.message || 'Failed to import games from Steam.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose} role="presentation">
-      <div
-        className="modal-container"
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="modal-title"
-      >
-        <div className="modal-header">
-          <div className="modal-title-group">
-            <span className="modal-icon">➕</span>
-            <h2 id="modal-title" className="modal-title">
-              {mode === 'manual' ? 'Add Game to Library' : 'Import from Steam'}
+    <div
+      aria-labelledby="add-game-title"
+      aria-modal="true"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-5 backdrop-blur-xs"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget && !isSubmitting) onClose();
+      }}
+      role="dialog"
+    >
+      <div className="w-full max-w-[480px] rounded-[6px] border border-[#d3d3d3] bg-white p-6 shadow-xl">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2
+              id="add-game-title"
+              className="text-[22px] font-semibold text-[#242424]"
+            >
+              Add a game
             </h2>
+            <p className="mt-1 text-[14px] text-[#717171]">
+              Add a title to your local GameVault library.
+            </p>
           </div>
           <button
-            className="modal-close-btn"
+            type="button"
+            className="text-[18px] text-[#717171] hover:text-[#242424]"
             onClick={onClose}
-            aria-label="Close dialog"
             disabled={isSubmitting}
+            aria-label="Close dialog"
           >
             ✕
           </button>
         </div>
 
-        {/* Tab switcher for Manual vs Steam */}
-        <div style={{ display: 'flex', gap: '0.5rem', padding: '0.75rem 1.25rem 0' }}>
+        {/* Tab switcher: Manual vs Steam */}
+        <div className="mt-4 flex gap-1 rounded-[4px] bg-[#f0f0f0] p-1">
           <button
             type="button"
-            className={`tab-btn ${mode === 'manual' ? 'active' : ''}`}
+            className={`flex-1 rounded-[3px] py-1.5 text-[13px] font-medium transition-colors ${
+              mode === 'manual'
+                ? 'bg-white text-[#242424] shadow-xs'
+                : 'text-[#717171] hover:text-[#242424]'
+            }`}
             onClick={() => {
               setMode('manual');
-              setApiError(null);
+              setError(null);
             }}
             disabled={isSubmitting}
           >
@@ -131,10 +142,14 @@ function AddGameModalDialog({ onClose, onSave, onImportSteam }) {
           </button>
           <button
             type="button"
-            className={`tab-btn ${mode === 'steam' ? 'active' : ''}`}
+            className={`flex-1 rounded-[3px] py-1.5 text-[13px] font-medium transition-colors ${
+              mode === 'steam'
+                ? 'bg-white text-[#242424] shadow-xs'
+                : 'text-[#717171] hover:text-[#242424]'
+            }`}
             onClick={() => {
               setMode('steam');
-              setApiError(null);
+              setError(null);
             }}
             disabled={isSubmitting}
           >
@@ -142,56 +157,71 @@ function AddGameModalDialog({ onClose, onSave, onImportSteam }) {
           </button>
         </div>
 
-        {apiError && (
-          <div className="alert alert-error" role="alert" style={{ margin: '1rem 1.25rem 0' }}>
-            <span className="alert-icon">⚠️</span>
-            <span>{apiError}</span>
+        {error && (
+          <div className="mt-4 rounded-[4px] border border-[#fca5a5] bg-[#fef2f2] px-3 py-2 text-[13px] text-[#b91c1c]">
+            ⚠️ {error}
           </div>
         )}
 
         {mode === 'manual' ? (
-          <form onSubmit={handleManualSubmit} className="modal-form">
-            <div className="form-group">
-              <label htmlFor="title" className="form-label">
-                Game Title <span className="required-star">*</span>
-              </label>
+          <form onSubmit={handleManualSubmit} className="mt-5 grid gap-4">
+            <label className="form-field">
+              <span>Game Title *</span>
               <input
-                id="title"
-                name="title"
-                type="text"
-                className={`form-input ${errors.title ? 'input-error' : ''}`}
-                placeholder="e.g. Cyberpunk 2077, God of War"
-                value={formData.title}
-                onChange={handleChange}
-                disabled={isSubmitting}
                 autoFocus
-              />
-              {errors.title && <span className="field-error">{errors.title}</span>}
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="status" className="form-label">
-                Status <span className="required-star">*</span>
-              </label>
-              <select
-                id="status"
-                name="status"
-                className="form-select"
-                value={formData.status}
-                onChange={handleChange}
+                placeholder="e.g. Baldur’s Gate 3, Hades"
+                required
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
                 disabled={isSubmitting}
-              >
-                <option value="PLAYING">⚔️ PLAYING</option>
-                <option value="COMPLETED">🏆 COMPLETED</option>
-                <option value="BACKLOG">⏳ BACKLOG</option>
-                <option value="DROPPED">🛑 DROPPED</option>
-              </select>
+              />
+            </label>
+
+            <div className="grid grid-cols-2 gap-4">
+              <label className="form-field">
+                <span>Status</span>
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  disabled={isSubmitting}
+                >
+                  {STATUS_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="form-field">
+                <span>Hours played</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  placeholder="0.0"
+                  value={hours}
+                  onChange={(e) => setHours(e.target.value)}
+                  disabled={isSubmitting}
+                />
+              </label>
             </div>
 
-            <div className="modal-footer">
+            <label className="form-field">
+              <span>Cover Image URL (optional)</span>
+              <input
+                type="url"
+                placeholder="https://..."
+                value={headerImageUrl}
+                onChange={(e) => setHeaderImageUrl(e.target.value)}
+                disabled={isSubmitting}
+              />
+            </label>
+
+            <div className="mt-4 flex justify-end gap-3 pt-2">
               <button
                 type="button"
-                className="btn btn-secondary"
+                className="secondary-button"
                 onClick={onClose}
                 disabled={isSubmitting}
               >
@@ -199,46 +229,34 @@ function AddGameModalDialog({ onClose, onSave, onImportSteam }) {
               </button>
               <button
                 type="submit"
-                className="btn btn-primary"
+                className="primary-button"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Saving...' : 'Save Game'}
+                {isSubmitting ? 'Saving...' : 'Add Game'}
               </button>
             </div>
           </form>
         ) : (
-          <form onSubmit={handleSteamSubmit} className="modal-form">
-            <div className="form-group">
-              <label htmlFor="steamId" className="form-label">
-                Steam ID (64-bit ID) <span className="required-star">*</span>
-              </label>
+          <form onSubmit={handleSteamSubmit} className="mt-5 grid gap-4">
+            <label className="form-field">
+              <span>Steam ID or Profile URL *</span>
               <input
-                id="steamId"
-                name="steamId"
-                type="text"
-                className={`form-input ${errors.steamId ? 'input-error' : ''}`}
-                placeholder="e.g. 76561198000000000"
-                value={steamId}
-                onChange={(e) => {
-                  setSteamId(e.target.value);
-                  if (errors.steamId) {
-                    setErrors((prev) => ({ ...prev, steamId: null }));
-                  }
-                  setApiError(null);
-                }}
-                disabled={isSubmitting}
                 autoFocus
+                placeholder="e.g. 76561198000000000 or custom vanity URL"
+                required
+                value={steamId}
+                onChange={(e) => setSteamId(e.target.value)}
+                disabled={isSubmitting}
               />
-              {errors.steamId && <span className="field-error">{errors.steamId}</span>}
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
-                Fetches your owned games, cover images, and logged playtimes directly from Valve&apos;s Steam Web API into the MySQL database.
-              </p>
-            </div>
+            </label>
+            <p className="text-[12px] text-[#717171]">
+              Imports all owned games, cover artworks, and recorded playtimes from Valve&apos;s Steam Web API directly into MySQL.
+            </p>
 
-            <div className="modal-footer">
+            <div className="mt-4 flex justify-end gap-3 pt-2">
               <button
                 type="button"
-                className="btn btn-secondary"
+                className="secondary-button"
                 onClick={onClose}
                 disabled={isSubmitting}
               >
@@ -246,7 +264,7 @@ function AddGameModalDialog({ onClose, onSave, onImportSteam }) {
               </button>
               <button
                 type="submit"
-                className="btn btn-primary"
+                className="primary-button"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? 'Syncing...' : 'Sync Steam Library'}

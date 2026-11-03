@@ -1,63 +1,141 @@
-:root {
-  --bg-primary: #0f172a;
-  --bg-surface: #1e293b;
-  --bg-surface-elevated: #283548;
-  --bg-surface-hover: #334155;
-  --border-subtle: #334155;
-  --border-focus: #6366f1;
+@import 'tailwindcss';
 
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-
-  --primary: #6366f1;
-  --primary-hover: #4f46e5;
-  --primary-light: rgba(99, 102, 241, 0.15);
-
-  --status-playing: #10b981;
-  --status-playing-bg: rgba(16, 185, 129, 0.15);
-  --status-completed: #a855f7;
-  --status-completed-bg: rgba(168, 85, 247, 0.15);
-  --status-backlog: #f59e0b;
-  --status-backlog-bg: rgba(245, 158, 11, 0.15);
-  --status-dropped: #ef4444;
-  --status-dropped-bg: rgba(239, 68, 68, 0.15);
-
-  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+@font-face {
+  font-family: 'Inter:Bold';
+  src: url('https://static.figma.com/font/Inter_1') format('woff2');
+  font-style: normal;
+  font-weight: 700;
 }
 
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+@font-face {
+  font-family: 'Inter:Medium';
+  src: url('https://static.figma.com/font/Inter_1') format('woff2');
+  font-style: normal;
+  font-weight: 500;
 }
 
-body {
-  font-family: var(--font-family);
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  min-height: 100vh;
+@font-face {
+  font-family: 'Inter:Regular';
+  src: url('https://static.figma.com/font/Inter_1') format('woff2');
+  font-style: normal;
+  font-weight: 400;
 }
 
-#root {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+@font-face {
+  font-family: 'Inter:Semi Bold';
+  src: url('https://static.figma.com/font/Inter_1') format('woff2');
+  font-style: normal;
+  font-weight: 600;
 }
 
-button, input, select, textarea {
-  font: inherit;
+@layer base {
+  body {
+    min-width: 320px;
+    min-height: 100vh;
+    background: #f7f7f7;
+    color: #242424;
+    font-family: 'Inter:Regular', Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button,
+  input,
+  select {
+    transition:
+      border-color 140ms ease,
+      background-color 140ms ease,
+      opacity 140ms ease;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: wait;
+    opacity: 0.65;
+  }
+
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible {
+    outline: 2px solid #242424;
+    outline-offset: 2px;
+  }
 }
 
-button {
-  cursor: pointer;
+@layer components {
+  .primary-button,
+  .secondary-button {
+    display: flex;
+    height: 40px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 4px;
+    padding-inline: 16px;
+    font-family: 'Inter:Regular', Inter, sans-serif;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .primary-button {
+    border: 1px solid #242424;
+    background: #242424;
+    color: #fff;
+  }
+
+  .primary-button:hover {
+    background: #3a3a3a;
+  }
+
+  .secondary-button {
+    border: 1px solid #d3d3d3;
+    background: #fff;
+    color: #242424;
+  }
+
+  .secondary-button:hover {
+    border-color: #a0a0a0;
+    background: #fafafa;
+  }
+
+  .danger-button {
+    border: 1px solid #dc2626;
+    background: #dc2626;
+    color: #fff;
+  }
+
+  .danger-button:hover {
+    background: #b91c1c;
+  }
+
+  .form-field {
+    display: grid;
+    gap: 7px;
+    color: #717171;
+    font-family: 'Inter:Medium', Inter, sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .form-field input,
+  .form-field select {
+    height: 44px;
+    width: 100%;
+    border: 1px solid #d3d3d3;
+    border-radius: 4px;
+    background: #fff;
+    padding-inline: 12px;
+    color: #242424;
+    font-family: 'Inter:Regular', Inter, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    outline: none;
+  }
+
+  .form-field input:focus,
+  .form-field select:focus {
+    border-color: #717171;
+  }
 }

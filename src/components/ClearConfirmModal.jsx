@@ -4,17 +4,14 @@ export default function ClearConfirmModal({ isOpen, onClose, onConfirm, gameCoun
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
+    if (!isOpen) return;
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && !isDeleting) {
         onClose();
       }
     };
-    if (isOpen) {
-      window.addEventListener('keydown', handleKeyDown);
-    }
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, isDeleting, onClose]);
 
   if (!isOpen) return null;
@@ -30,55 +27,64 @@ export default function ClearConfirmModal({ isOpen, onClose, onConfirm, gameCoun
   };
 
   return (
-    <div className="modal-backdrop" onClick={!isDeleting ? onClose : undefined} role="presentation">
-      <div
-        className="modal-container"
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="clear-modal-title"
-      >
-        <div className="modal-header">
-          <div className="modal-title-group">
-            <span className="modal-icon" role="img" aria-label="warning">⚠️</span>
-            <h2 id="clear-modal-title" className="modal-title">Clear Entire Library?</h2>
+    <div
+      aria-labelledby="clear-modal-title"
+      aria-modal="true"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-5 backdrop-blur-xs"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget && !isDeleting) onClose();
+      }}
+      role="dialog"
+    >
+      <div className="w-full max-w-[460px] rounded-[6px] border border-[#d3d3d3] bg-white p-6 shadow-xl">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-[20px]">⚠️</span>
+            <h2
+              id="clear-modal-title"
+              className="text-[20px] font-semibold text-[#242424]"
+            >
+              Reset your library?
+            </h2>
           </div>
           <button
-            className="modal-close-btn"
+            type="button"
+            className="text-[18px] text-[#717171] hover:text-[#242424]"
             onClick={onClose}
-            aria-label="Close dialog"
             disabled={isDeleting}
+            aria-label="Close dialog"
           >
             ✕
           </button>
         </div>
 
-        <div style={{ padding: '1.25rem' }}>
-          <p style={{ color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '1rem' }}>
-            Are you sure you want to permanently delete all <strong>{gameCount}</strong> game{gameCount === 1 ? '' : 's'} from your database?
+        <div className="mt-4 text-[14px] leading-relaxed text-[#717171]">
+          <p>
+            Are you sure you want to permanently delete all{' '}
+            <strong className="text-[#242424]">{gameCount}</strong> game
+            {gameCount === 1 ? '' : 's'} from your database?
           </p>
-          <div className="alert alert-error" role="alert" style={{ marginBottom: '1rem' }}>
-            <span className="alert-icon">🛑</span>
-            <span>This action cannot be undone. All stored titles, playtimes, and statuses will be erased. You can re-import from Steam at any time.</span>
+          <div className="mt-3 rounded-[4px] border border-[#fca5a5] bg-[#fef2f2] p-3 text-[13px] text-[#b91c1c]">
+            🛑 This action cannot be undone. All stored titles and playtimes will be wiped.
           </div>
         </div>
 
-        <div className="modal-footer">
+        <div className="mt-6 flex justify-end gap-3">
           <button
             type="button"
-            className="btn btn-secondary"
+            className="secondary-button"
             onClick={onClose}
             disabled={isDeleting}
           >
-            Cancel (Go Back)
+            Cancel
           </button>
           <button
             type="button"
-            className="btn btn-danger"
+            className="rounded-[4px] bg-[#dc2626] px-4 py-2 text-[14px] font-medium text-white transition-colors hover:bg-[#b91c1c] disabled:opacity-50"
             onClick={handleConfirm}
             disabled={isDeleting}
           >
-            {isDeleting ? 'Deleting...' : 'Yes, Delete Everything'}
+            {isDeleting ? 'Resetting...' : 'Yes, Delete All'}
           </button>
         </div>
       </div>

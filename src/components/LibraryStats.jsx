@@ -1,53 +1,34 @@
 import React from 'react';
 
 export default function LibraryStats({ items = [] }) {
-  const totalGames = items.length;
-  const playingCount = items.filter((g) => g.status === 'PLAYING').length;
-  const completedCount = items.filter((g) => g.status === 'COMPLETED').length;
-  const backlogCount = items.filter((g) => g.status === 'BACKLOG').length;
-  const droppedCount = items.filter((g) => g.status === 'DROPPED').length;
+  const normalize = (status) => (status ? status.toUpperCase() : '');
+
+  const counts = {
+    'Total Games': items.length,
+    Playing: items.filter((g) => normalize(g.status) === 'PLAYING').length,
+    Completed: items.filter((g) => normalize(g.status) === 'COMPLETED').length,
+    Backlog: items.filter((g) => normalize(g.status) === 'BACKLOG').length,
+    Dropped: items.filter((g) => normalize(g.status) === 'DROPPED').length,
+  };
 
   return (
-    <section className="stats-grid" aria-label="Library Overview Statistics">
-      <div className="stat-card">
-        <div className="stat-icon">📚</div>
-        <div className="stat-content">
-          <span className="stat-value">{totalGames}</span>
-          <span className="stat-label">Total Games</span>
+    <section
+      aria-label="Library statistics"
+      className="grid grid-cols-2 gap-4 md:grid-cols-5"
+    >
+      {Object.entries(counts).map(([label, value]) => (
+        <div
+          key={label}
+          className="flex h-[100px] flex-col justify-center gap-1 rounded-[6px] border border-[#d3d3d3] bg-white px-5 py-4 shadow-xs"
+        >
+          <span className="text-[12px] font-medium text-[#717171]">
+            {label}
+          </span>
+          <strong className="text-[30px] font-semibold leading-tight text-[#242424]">
+            {value}
+          </strong>
         </div>
-      </div>
-
-      <div className="stat-card stat-playing">
-        <div className="stat-icon">⚔️</div>
-        <div className="stat-content">
-          <span className="stat-value">{playingCount}</span>
-          <span className="stat-label">Playing</span>
-        </div>
-      </div>
-
-      <div className="stat-card stat-completed">
-        <div className="stat-icon">🏆</div>
-        <div className="stat-content">
-          <span className="stat-value">{completedCount}</span>
-          <span className="stat-label">Completed</span>
-        </div>
-      </div>
-
-      <div className="stat-card stat-backlog">
-        <div className="stat-icon">⏳</div>
-        <div className="stat-content">
-          <span className="stat-value">{backlogCount}</span>
-          <span className="stat-label">Backlog</span>
-        </div>
-      </div>
-
-      <div className="stat-card stat-dropped">
-        <div className="stat-icon">🛑</div>
-        <div className="stat-content">
-          <span className="stat-value">{droppedCount}</span>
-          <span className="stat-label">Dropped</span>
-        </div>
-      </div>
+      ))}
     </section>
   );
 }

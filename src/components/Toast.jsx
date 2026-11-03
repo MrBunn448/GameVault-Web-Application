@@ -5,7 +5,7 @@ export default function Toast({ toast, onClose }) {
     if (!toast) return;
     const timer = setTimeout(() => {
       onClose();
-    }, 4000);
+    }, 3500);
     return () => clearTimeout(timer);
   }, [toast, onClose]);
 
@@ -14,10 +14,17 @@ export default function Toast({ toast, onClose }) {
   const isSuccess = toast.type === 'success';
 
   return (
-    <div className={`toast-container ${isSuccess ? 'toast-success' : 'toast-error'}`} role="status">
-      <span className="toast-icon">{isSuccess ? '✅' : '❌'}</span>
-      <span className="toast-message">{toast.message}</span>
-      <button className="toast-close" onClick={onClose} aria-label="Dismiss toast">
+    <div
+      role="status"
+      className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-[6px] border border-[#d3d3d3] bg-white px-4 py-3 shadow-lg text-[13px] text-[#242424] transition-all"
+    >
+      <span>{isSuccess ? '✅' : '⚠️'}</span>
+      <span className="font-medium">{toast.message}</span>
+      <button
+        onClick={onClose}
+        className="ml-2 text-[12px] text-[#717171] hover:text-[#242424]"
+        aria-label="Dismiss notification"
+      >
         ✕
       </button>
     </div>
