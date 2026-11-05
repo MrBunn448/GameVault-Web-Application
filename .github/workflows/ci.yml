@@ -33,6 +33,10 @@ jobs:
       - name: Run linter
         run: npm run lint
 
+      # End-to-End (E2E) testing with Cypress
+      - name: Run Cypress E2E tests
+        run: npm run test:e2e
+
       # Build production bundle with Vite
       - name: Build
         run: npm run build
