@@ -75,9 +75,18 @@ This initial release addresses the core user stories defined for Portfolio Revie
    npm run build
    ```
 
-4. **Lint Codebase:**
+4. **Lint Codebase (Static Analysis with Oxlint):**
    ```bash
    npm run lint
+   ```
+
+5. **Automated End-to-End Testing (Cypress E2E):**
+   ```bash
+   # Run headless Cypress E2E test suite (spins up Vite dev server automatically)
+   npm run test:e2e
+
+   # Or open interactive Cypress GUI test runner
+   npm run cypress:open
    ```
 
 ---
