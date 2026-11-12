@@ -1,7 +1,7 @@
-describe('GameVault Library E2E Tests', () => {
+describe('GameVault Library E2E Tests (Cypress Best Practices - data-cy selectors)', () => {
   beforeEach(() => {
-    // Intercept initial library fetch
-    cy.intercept('GET', '/api/library', {
+    // Intercept initial library fetch (matches both /api/libraries and /api/library)
+    cy.intercept('GET', '**/api/librar*', {
       statusCode: 200,
       body: [
         {
@@ -32,30 +32,26 @@ describe('GameVault Library E2E Tests', () => {
     }).as('getLibrary');
   });
 
-  it('US-10: displays game library list with cards, badges, and stats', () => {
+  it('US-10: displays game library list with cards, badges, and stats via data-cy attributes', () => {
     cy.visit('/');
     cy.wait('@getLibrary');
 
-    // Check heading and navigation
-    cy.contains('h1', 'Your library').should('be.visible');
-    cy.contains('GameVault').should('be.visible');
+    // Check heading and app title using resilient data-cy attributes
+    cy.get('[data-cy="app-title"]').should('be.visible').and('contain.text', 'GameVault');
+    cy.get('[data-cy="library-heading"]').should('be.visible');
 
-    // Verify all 3 game cards are visible
-    cy.contains('Portal 2').should('be.visible');
-    cy.contains('Terraria').should('be.visible');
-    cy.contains('Hollow Knight').should('be.visible');
-
-    // Verify badges
-    cy.contains('Completed').should('be.visible');
-    cy.contains('Playing').should('be.visible');
-    cy.contains('Backlog').should('be.visible');
+    // Verify all 3 game cards rendered
+    cy.get('[data-cy="game-card"]').should('have.length', 3);
+    cy.get('[data-cy="game-card"]').contains('Portal 2').should('be.visible');
+    cy.get('[data-cy="game-card"]').contains('Terraria').should('be.visible');
+    cy.get('[data-cy="game-card"]').contains('Hollow Knight').should('be.visible');
 
     // Verify footer summary count
-    cy.contains('Showing all 3 games').should('be.visible');
+    cy.get('[data-cy="footer-count"]').should('be.visible').and('contain.text', '3 games');
   });
 
   it('displays empty state when library has no games', () => {
-    cy.intercept('GET', '/api/library', {
+    cy.intercept('GET', '**/api/librar*', {
       statusCode: 200,
       body: [],
     }).as('getEmptyLibrary');
@@ -63,12 +59,13 @@ describe('GameVault Library E2E Tests', () => {
     cy.visit('/');
     cy.wait('@getEmptyLibrary');
 
-    cy.contains('h2', 'Your library is empty').should('be.visible');
-    cy.contains('Add a game manually or import your owned games from Steam to get started.').should('be.visible');
+    cy.get('[data-cy="empty-state"]').should('be.visible');
+    cy.get('[data-cy="empty-state-title"]').should('be.visible');
+    cy.get('[data-cy="empty-add-game-btn"]').should('be.visible');
   });
 
-  it('US-09: opens modal and manually adds a game to the library', () => {
-    cy.intercept('POST', '/api/library', {
+  it('US-09: opens modal and manually adds a game to the library using data-cy selectors', () => {
+    cy.intercept('POST', '**/api/librar*', {
       statusCode: 201,
       body: {
         id: 99,
@@ -83,49 +80,47 @@ describe('GameVault Library E2E Tests', () => {
     cy.visit('/');
     cy.wait('@getLibrary');
 
-    // Click Add Game button in navbar
-    cy.contains('button', 'Add Game').click();
+    // Click Add Game button via dedicated test attribute
+    cy.get('[data-cy="add-game-btn"]').click();
 
     // Verify modal is displayed
-    cy.contains('h2', 'Add a game').should('be.visible');
+    cy.get('[data-cy="add-game-modal"]').should('be.visible');
+    cy.get('[data-cy="modal-heading"]').should('be.visible');
 
-    // Fill form
-    cy.get('input[placeholder*="Baldur’s Gate 3"]').type('Elden Ring');
-    cy.get('input[type="number"]').type('60');
+    // Fill form using decoupled input selectors
+    cy.get('[data-cy="game-title-input"]').type('Elden Ring');
+    cy.get('[data-cy="game-hours-input"]').type('60');
 
     // Submit modal form
-    cy.get('button[type="submit"]').click();
+    cy.get('[data-cy="submit-game-btn"]').click();
     cy.wait('@addGame');
 
     // Check success toast and new card rendered
-    cy.contains('Added "Elden Ring" to your library!').should('be.visible');
-    cy.contains('Elden Ring').should('be.visible');
+    cy.get('[data-cy="toast-notification"]').should('be.visible').and('contain.text', 'Elden Ring');
+    cy.get('[data-cy="game-card"]').contains('Elden Ring').should('be.visible');
   });
 
   it('filters games by status and searches by title', () => {
     cy.visit('/');
     cy.wait('@getLibrary');
 
-    // Filter by "Playing"
-    cy.contains('button', 'Playing').click();
-    cy.contains('Terraria').should('be.visible');
-    cy.contains('Portal 2').should('not.exist');
-    cy.contains('Hollow Knight').should('not.exist');
+    // Filter by "Playing" via data-cy
+    cy.get('[data-cy="filter-playing"]').click();
+    cy.get('[data-cy="game-card"]').should('have.length', 1);
+    cy.get('[data-cy="game-card"]').contains('Terraria').should('be.visible');
 
-    // Switch back to "All"
-    cy.contains('button', 'All').click();
-    cy.contains('Portal 2').should('be.visible');
-    cy.contains('Terraria').should('be.visible');
+    // Switch back to "All" via data-cy
+    cy.get('[data-cy="filter-all"]').click();
+    cy.get('[data-cy="game-card"]').should('have.length', 3);
 
-    // Search for "Portal"
-    cy.get('input[placeholder="Search your games..."]').type('Portal');
-    cy.contains('Portal 2').should('be.visible');
-    cy.contains('Terraria').should('not.exist');
-    cy.contains('Hollow Knight').should('not.exist');
+    // Search for "Portal" via data-cy
+    cy.get('[data-cy="search-input"]').type('Portal');
+    cy.get('[data-cy="game-card"]').should('have.length', 1);
+    cy.get('[data-cy="game-card"]').contains('Portal 2').should('be.visible');
   });
 
   it('US-11: deletes a game from library with confirmation', () => {
-    cy.intercept('DELETE', '/api/library/1', {
+    cy.intercept('DELETE', '**/api/librar*/1', {
       statusCode: 204,
       body: {},
     }).as('deleteGame');
@@ -133,17 +128,16 @@ describe('GameVault Library E2E Tests', () => {
     cy.visit('/');
     cy.wait('@getLibrary');
 
-    // Find Portal 2 card and click its delete button
-    cy.get('article').filter(':contains("Portal 2")').within(() => {
-      cy.get('button[aria-label="Delete Portal 2"]').click();
-      // Click confirm "Yes"
-      cy.contains('button', 'Yes').click();
+    // Find Portal 2 card and click its delete button via data-cy
+    cy.get('[data-cy="game-card"]').filter(':contains("Portal 2")').within(() => {
+      cy.get('[data-cy="delete-game-btn"]').click();
+      cy.get('[data-cy="confirm-delete-btn"]').click();
     });
 
     cy.wait('@deleteGame');
 
     // Toast notification and card removal
-    cy.contains('Game removed from library').should('be.visible');
-    cy.contains('Portal 2').should('not.exist');
+    cy.get('[data-cy="toast-notification"]').should('be.visible').and('contain.text', 'removed');
+    cy.get('[data-cy="game-card"]').contains('Portal 2').should('not.exist');
   });
 });

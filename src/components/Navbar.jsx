@@ -15,14 +15,14 @@ export default function Navbar({
           🎮
         </div>
         <div className="flex flex-col">
-          <span className="text-[22px] font-bold tracking-[-0.5px] text-[#242424]">
+          <span data-cy="app-title" className="text-[22px] font-bold tracking-[-0.5px] text-[#242424]">
             GameVault
           </span>
         </div>
       </div>
 
       <div className="flex flex-wrap items-center justify-end gap-3">
-        <div className="hidden items-center gap-2 pr-1 text-[12px] text-[#717171] sm:flex lg:pr-4">
+        <div data-cy="connection-status" className="hidden items-center gap-2 pr-1 text-[12px] text-[#717171] sm:flex lg:pr-4">
           <span
             className={`inline-block size-2 rounded-full ${
               isConnected ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'
@@ -32,6 +32,7 @@ export default function Navbar({
         </div>
 
         <button
+          data-cy="refresh-btn"
           className="secondary-button"
           disabled={isRefreshing}
           onClick={onRefresh}
@@ -46,6 +47,7 @@ export default function Navbar({
 
         {gamesCount > 0 && onOpenClearModal && (
           <button
+            data-cy="reset-data-btn"
             className="secondary-button text-[#dc2626] hover:border-[#dc2626] hover:bg-red-50"
             onClick={onOpenClearModal}
             type="button"
@@ -57,6 +59,7 @@ export default function Navbar({
         )}
 
         <button
+          data-cy="add-game-btn"
           className="primary-button"
           onClick={onOpenAddModal}
           type="button"

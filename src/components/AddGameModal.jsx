@@ -99,11 +99,12 @@ function AddGameDialog({ onClose, onSave, onImportSteam }) {
       }}
       role="dialog"
     >
-      <div className="w-full max-w-[480px] rounded-[6px] border border-[#d3d3d3] bg-white p-6 shadow-xl">
+      <div data-cy="add-game-modal" className="w-full max-w-[480px] rounded-[6px] border border-[#d3d3d3] bg-white p-6 shadow-xl">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2
               id="add-game-title"
+              data-cy="modal-heading"
               className="text-[22px] font-semibold text-[#242424]"
             >
               Add a game
@@ -114,6 +115,7 @@ function AddGameDialog({ onClose, onSave, onImportSteam }) {
           </div>
           <button
             type="button"
+            data-cy="modal-close-btn"
             className="text-[18px] text-[#717171] hover:text-[#242424]"
             onClick={onClose}
             disabled={isSubmitting}
@@ -127,6 +129,7 @@ function AddGameDialog({ onClose, onSave, onImportSteam }) {
         <div className="mt-4 flex gap-1 rounded-[4px] bg-[#f0f0f0] p-1">
           <button
             type="button"
+            data-cy="tab-manual-btn"
             className={`flex-1 rounded-[3px] py-1.5 text-[13px] font-medium transition-colors ${
               mode === 'manual'
                 ? 'bg-white text-[#242424] shadow-xs'
@@ -142,6 +145,7 @@ function AddGameDialog({ onClose, onSave, onImportSteam }) {
           </button>
           <button
             type="button"
+            data-cy="tab-steam-btn"
             className={`flex-1 rounded-[3px] py-1.5 text-[13px] font-medium transition-colors ${
               mode === 'steam'
                 ? 'bg-white text-[#242424] shadow-xs'
@@ -158,7 +162,7 @@ function AddGameDialog({ onClose, onSave, onImportSteam }) {
         </div>
 
         {error && (
-          <div className="mt-4 rounded-[4px] border border-[#fca5a5] bg-[#fef2f2] px-3 py-2 text-[13px] text-[#b91c1c]">
+          <div data-cy="modal-error-message" className="mt-4 rounded-[4px] border border-[#fca5a5] bg-[#fef2f2] px-3 py-2 text-[13px] text-[#b91c1c]">
             ⚠️ {error}
           </div>
         )}
@@ -169,6 +173,7 @@ function AddGameDialog({ onClose, onSave, onImportSteam }) {
               <span>Game Title *</span>
               <input
                 autoFocus
+                data-cy="game-title-input"
                 placeholder="e.g. Baldur’s Gate 3, Hades"
                 required
                 value={title}
@@ -181,6 +186,7 @@ function AddGameDialog({ onClose, onSave, onImportSteam }) {
               <label className="form-field">
                 <span>Status</span>
                 <select
+                  data-cy="game-status-select"
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
                   disabled={isSubmitting}
@@ -197,6 +203,7 @@ function AddGameDialog({ onClose, onSave, onImportSteam }) {
                 <span>Hours played</span>
                 <input
                   type="number"
+                  data-cy="game-hours-input"
                   min="0"
                   step="0.1"
                   placeholder="0.0"
@@ -211,6 +218,7 @@ function AddGameDialog({ onClose, onSave, onImportSteam }) {
               <span>Cover Image URL (optional)</span>
               <input
                 type="url"
+                data-cy="game-image-input"
                 placeholder="https://..."
                 value={headerImageUrl}
                 onChange={(e) => setHeaderImageUrl(e.target.value)}
@@ -229,6 +237,7 @@ function AddGameDialog({ onClose, onSave, onImportSteam }) {
               </button>
               <button
                 type="submit"
+                data-cy="submit-game-btn"
                 className="primary-button"
                 disabled={isSubmitting}
               >
@@ -242,6 +251,7 @@ function AddGameDialog({ onClose, onSave, onImportSteam }) {
               <span>Steam ID or Profile URL *</span>
               <input
                 autoFocus
+                data-cy="steam-id-input"
                 placeholder="e.g. 76561198000000000 or custom vanity URL"
                 required
                 value={steamId}
@@ -264,6 +274,7 @@ function AddGameDialog({ onClose, onSave, onImportSteam }) {
               </button>
               <button
                 type="submit"
+                data-cy="submit-steam-btn"
                 className="primary-button"
                 disabled={isSubmitting}
               >

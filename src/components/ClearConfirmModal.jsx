@@ -36,12 +36,13 @@ export default function ClearConfirmModal({ isOpen, onClose, onConfirm, gameCoun
       }}
       role="dialog"
     >
-      <div className="w-full max-w-[460px] rounded-[6px] border border-[#d3d3d3] bg-white p-6 shadow-xl">
+      <div data-cy="clear-confirm-modal" className="w-full max-w-[460px] rounded-[6px] border border-[#d3d3d3] bg-white p-6 shadow-xl">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-2">
             <span className="text-[20px]">⚠️</span>
             <h2
               id="clear-modal-title"
+              data-cy="clear-modal-title"
               className="text-[20px] font-semibold text-[#242424]"
             >
               Reset your library?
@@ -49,6 +50,7 @@ export default function ClearConfirmModal({ isOpen, onClose, onConfirm, gameCoun
           </div>
           <button
             type="button"
+            data-cy="clear-modal-close-btn"
             className="text-[18px] text-[#717171] hover:text-[#242424]"
             onClick={onClose}
             disabled={isDeleting}
@@ -80,6 +82,7 @@ export default function ClearConfirmModal({ isOpen, onClose, onConfirm, gameCoun
           </button>
           <button
             type="button"
+            data-cy="confirm-clear-all-btn"
             className="rounded-[4px] bg-[#dc2626] px-4 py-2 text-[14px] font-medium text-white transition-colors hover:bg-[#b91c1c] disabled:opacity-50"
             onClick={handleConfirm}
             disabled={isDeleting}

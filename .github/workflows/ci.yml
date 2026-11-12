@@ -10,6 +10,10 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build:
     name: Build Frontend
@@ -21,7 +25,7 @@ jobs:
         uses: actions/checkout@v4
 
       # Set up Node.js 22 environment
-      - name: Set up Java JDK / Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -34,7 +38,7 @@ jobs:
       - name: Run linter
         run: npm run lint
 
-      # End-to-End (E2E) testing with Cypress
+      # End-to-End (E2E) testing with Cypress (using data-cy attributes)
       - name: Run Cypress E2E tests
         run: npm run test:e2e
 
@@ -42,29 +46,56 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Log in to GitHub Container Registry (Industry Standard Option B)
+      - name: Log in to GitHub Container Registry
+        if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || github.event_name == 'workflow_dispatch'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Build and push Docker image to GHCR (Build Once principle: built & tested in CI, deployed to CD)
+      - name: Build and push Docker image to GHCR
+        if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || github.event_name == 'workflow_dispatch'
+        run: |
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE="ghcr.io/${REPO_LOWER}/gamevault-frontend:latest"
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"
+
   deploy:
-    name: Continuous Delivery (Educloud Production)
+    name: Continuous Deployment (Educloud Production)
     needs: build
     runs-on: self-hosted
-    environment:
-      name: production
-      url: http://[2001:67c:6ec:7331:1c01:11ff:fe01:55f4]:3000
     if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || github.event_name == 'workflow_dispatch'
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Deploy Frontend Container on Educloud
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy Pre-built Frontend Container on Educloud
         run: |
-          docker build -t gamevault-frontend .
-          docker stop gamevault-frontend || true
-          docker rm gamevault-frontend || true
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE="ghcr.io/${REPO_LOWER}/gamevault-frontend:latest"
+
+          # Pull pre-built image verified in CI (No compilation on production runner)
+          docker pull "$IMAGE"
+          docker stop gamevault-frontend 2>/dev/null || true
+          docker rm gamevault-frontend 2>/dev/null || true
+
           BACKEND_NET=$(docker inspect gamevault-backend --format '{{range $net, $v := .NetworkSettings.Networks}}{{$net}}{{end}}' 2>/dev/null || echo "bridge")
           docker run -d \
             --name gamevault-frontend \
             --restart always \
             -p 3000:80 \
             --network "$BACKEND_NET" \
-            gamevault-frontend
+            "$IMAGE"
           docker ps

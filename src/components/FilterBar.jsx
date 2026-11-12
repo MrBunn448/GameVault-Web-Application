@@ -26,6 +26,7 @@ export default function FilterBar({
           </span>
           <span className="sr-only">Search your games</span>
           <input
+            data-cy="search-input"
             className="h-full w-full rounded-[4px] border border-[#d3d3d3] bg-white pl-[45px] pr-9 text-[14px] text-[#242424] outline-none placeholder:text-[#717171] focus:border-[#717171]"
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search your games..."
@@ -34,6 +35,7 @@ export default function FilterBar({
           {searchQuery && (
             <button
               type="button"
+              data-cy="clear-search-btn"
               className="absolute right-3 text-[14px] text-[#717171] hover:text-[#242424]"
               onClick={() => onSearchChange('')}
               title="Clear search"
@@ -46,6 +48,7 @@ export default function FilterBar({
         <label className="relative h-11 md:w-[240px]">
           <span className="sr-only">Sort games</span>
           <select
+            data-cy="sort-select"
             className="h-full w-full appearance-none rounded-[4px] border border-[#d3d3d3] bg-white px-4 pr-10 text-[14px] text-[#242424] outline-none focus:border-[#717171] cursor-pointer"
             onChange={(e) => onSortChange(e.target.value)}
             value={sortBy}
@@ -70,6 +73,7 @@ export default function FilterBar({
               <button
                 key={key}
                 role="tab"
+                data-cy={`filter-${key.toLowerCase()}`}
                 aria-selected={isSelected}
                 className={`h-10 shrink-0 rounded-[4px] px-4 text-[14px] transition-colors ${
                   isSelected

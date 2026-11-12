@@ -22,7 +22,11 @@ export default function GameCard({ game, onDelete }) {
   const source = game.steamAppId ? 'Steam' : 'Manual';
 
   return (
-    <article className="overflow-hidden rounded-[6px] border border-[#d3d3d3] bg-white transition-shadow hover:shadow-sm flex flex-col justify-between">
+    <article
+      data-cy="game-card"
+      data-game-id={game.id}
+      className="overflow-hidden rounded-[6px] border border-[#d3d3d3] bg-white transition-shadow hover:shadow-sm flex flex-col justify-between"
+    >
       {/* Cover Image Area */}
       <div className="relative flex h-[156px] w-full items-center justify-center overflow-hidden bg-[#e8e8e8]">
         {game.headerImageUrl ? (
@@ -46,6 +50,7 @@ export default function GameCard({ game, onDelete }) {
 
         {/* Status Badge */}
         <span
+          data-cy="game-status-badge"
           className={`absolute left-3 top-3 flex h-[26px] items-center rounded-[4px] border px-2 text-[12px] font-medium shadow-xs ${
             isPlaying
               ? 'border-[#242424] bg-[#242424] text-white'
@@ -64,6 +69,7 @@ export default function GameCard({ game, onDelete }) {
       {/* Card Body */}
       <div className="flex flex-1 flex-col justify-between gap-4 p-4">
         <h2
+          data-cy="game-title"
           className="text-[17px] font-semibold leading-snug text-[#242424] line-clamp-2"
           title={game.title}
         >
@@ -87,6 +93,7 @@ export default function GameCard({ game, onDelete }) {
                 <div className="flex items-center gap-1">
                   <button
                     type="button"
+                    data-cy="cancel-delete-btn"
                     className="text-[11px] text-[#717171] hover:underline"
                     onClick={() => setIsConfirmingDelete(false)}
                   >
@@ -94,6 +101,7 @@ export default function GameCard({ game, onDelete }) {
                   </button>
                   <button
                     type="button"
+                    data-cy="confirm-delete-btn"
                     className="rounded-[3px] bg-[#dc2626] px-1.5 py-0.5 text-[11px] font-medium text-white hover:bg-[#b91c1c]"
                     onClick={() => {
                       setIsConfirmingDelete(false);
@@ -106,6 +114,7 @@ export default function GameCard({ game, onDelete }) {
               ) : (
                 <button
                   type="button"
+                  data-cy="delete-game-btn"
                   className="text-[#a0a0a0] hover:text-[#dc2626] transition-colors"
                   onClick={() => setIsConfirmingDelete(true)}
                   title="Remove game from library"

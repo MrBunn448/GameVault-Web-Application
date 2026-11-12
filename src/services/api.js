@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const BASE_URL = import.meta.env.VITE_API_URL || '/api/library';
+// Base URL follows REST resource pluralization best practice (/api/libraries)
+const BASE_URL = import.meta.env.VITE_API_URL || '/api/libraries';
 
 function handleError(error) {
   const data = error.response?.data;
